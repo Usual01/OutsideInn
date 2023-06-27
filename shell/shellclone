@@ -1,0 +1,42 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/wait.h>
+
+#define BUFFER_SIZE 256
+
+void shell() {
+    char buffer[BUFFER_SIZE];
+    
+    while (1) {
+        printf("mircle_says");
+
+        if (fgets(buffer, BUFFER_SIZE, stdin) == NULL) {
+            printf("\nGoodbye.\n");
+            break;
+        }
+        buffer[strcspn(buffer, "\n")] = '\0';
+        
+        pid_t pid = fork();
+        
+        if (pid < 0) {
+            fprintf(stderr, "Fork failed\n");
+            continue;
+        } else if (pid == 0) {
+            // Child process
+            execlp(buffer, buffer, NULL);
+            fprintf(stderr, "Command '%s' not found\n", buffer);
+            exit(EXIT_FAILURE);
+        } else {
+            // Parent process
+            int status;
+            waitpid(pid, &status, 0);
+        }
+    }
+}
+
+int main() {
+    shell();
+    return 0;
+}
